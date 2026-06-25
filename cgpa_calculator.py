@@ -15,8 +15,7 @@ st.set_page_config(
 
 DB_FILE = "pca_platform.db"
 
-# --- SECURITY ENGINE: COMPATIBLE PBKDF2 ENFORCEMENT ---
-# Safe lookup: reads your dashboard secrets manager, falls back to local string if empty
+# --- SECURITY ENGINE ---
 SECURITY_PEPPER = st.secrets.get("PCA_PEPPER", os.getenv("PCA_PEPPER", "EKSU_FPS_FIXED_FALLBACK_2026"))
 
 def secure_hash(password: str, username: str) -> str:
@@ -26,7 +25,7 @@ def secure_hash(password: str, username: str) -> str:
         'sha256', 
         password.encode('utf-8'), 
         salt, 
-        100000  # 100k iteration stretching
+        100000
     )
     return key.hex()
 
@@ -35,7 +34,6 @@ def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # Core User Registry
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
@@ -47,7 +45,6 @@ def init_db():
         )
     """)
     
-    # Cumulative Summary Logs
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +57,6 @@ def init_db():
         )
     """)
     
-    # Granular Course Ledger
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS course_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,7 +71,6 @@ def init_db():
         )
     """)
     
-    # Safety Gates for Schema Migrations
     try:
         cursor.execute("ALTER TABLE users ADD COLUMN matric_no TEXT")
         cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_matric ON users(matric_no)")
@@ -110,13 +105,11 @@ custom_css = """
     .platform-footer { text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #E0E0E0; }
 </style>
 """
-# FIXED: Safe version-agnostic call syntax
 st.markdown(custom_css, unsafe_allow_html=True)
 
 if "logged_in_user" not in st.session_state: st.session_state["logged_in_user"] = None
 if "user_profile" not in st.session_state: st.session_state["user_profile"] = {}
 
-# FIXED: Removed potential keyword argument parser bugs
 st.markdown("<h1>🎓 Physical Sciences Academic Companion (PCA)</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Official Portal | Faculty of Physical Sciences</p>", unsafe_allow_html=True)
 
@@ -294,7 +287,7 @@ with tab1:
                     st.success("🚀 Comprehensive courses and summary records logged permanently.")
                 conn.close()
 
-# TAB 2: TARGET TRACKING PROGRESS GAUGES
+# TAB 2: TARGET TRACKING
 with tab2:
     st.markdown("<h2>🎯 Target Engine</h2>", unsafe_allow_html=True)
     curr_cgpa = st.number_input("Your Current CGPA Baseline", min_value=0.0, max_value=5.0, value=3.42)
@@ -305,9 +298,10 @@ with tab2:
     st.write(f"**First Class Boundary Track (4.50+)** | Progress: {fc_progress*100:.1f}%")
     st.progress(fc_progress)
     
-    21_progress = min(max(curr_cgpa / 3.50, 0.0), 1.0)
-    st.write(f"**Second Class Upper Track (3.50+)** | Progress: {21_progress*100:.1f}%")
-    st.progress(21_progress)
+    # FIXED: Replaced illegal variable name starting with a digit
+    upper_second_progress = min(max(curr_cgpa / 3.50, 0.0), 1.0)
+    st.write(f"**Second Class Upper Track (3.50+)** | Progress: {upper_second_progress*100:.1f}%")
+    st.progress(upper_second_progress)
 
 # TAB 3: SMART DATA-DRIVEN ACADEMIC ADVISER
 with tab3:
