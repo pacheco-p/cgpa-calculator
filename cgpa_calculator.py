@@ -16,7 +16,7 @@ st.set_page_config(
 DB_FILE = "pca_platform.db"
 
 # --- PRODUCTION-GRADE SECURITY: PBKDF2 KEY STRETCHING & SECURE SECRETS ---
-# Safely pull pepper from Streamlit Secrets or environment fallback
+# Pull pepper from Streamlit Secrets or environment fallback safely
 SECURITY_PEPPER = st.secrets.get("PCA_PEPPER", os.getenv("PCA_PEPPER", "FPS_DEFAULT_LOCAL_PEPPER_2026"))
 
 def secure_hash(password: str, username: str) -> str:
@@ -60,7 +60,7 @@ def init_db():
         )
     """)
     
-    # NEW FEATURE: Granular Course Storage for Audits & Forecasting
+    # Course Storage for Audits & Forecasting
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS course_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,13 +79,20 @@ def init_db():
     try:
         cursor.execute("ALTER TABLE users ADD COLUMN matric_no TEXT")
         cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_matric ON users(matric_no)")
-    except sqlite3.OperationalError: pass
-    try: cursor.execute("ALTER TABLE users ADD COLUMN department TEXT")
-    except sqlite3.OperationalError: pass
-    try: cursor.execute("ALTER TABLE users ADD COLUMN level TEXT")
-    except sqlite3.OperationalError: pass
-    try: cursor.execute("ALTER TABLE users ADD COLUMN date_created TEXT")
-    except sqlite3.OperationalError: pass
+    except sqlite3.OperationalError: 
+        pass
+    try: 
+        cursor.execute("ALTER TABLE users ADD COLUMN department TEXT")
+    except sqlite3.OperationalError: 
+        pass
+    try: 
+        cursor.execute("ALTER TABLE users ADD COLUMN level TEXT")
+    except sqlite3.OperationalError: 
+        pass
+    try: 
+        cursor.execute("ALTER TABLE users ADD COLUMN date_created TEXT")
+    except sqlite3.OperationalError: 
+        pass
             
     conn.commit()
     conn.close()
@@ -110,13 +117,16 @@ custom_css = """
     .platform-footer { text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #E0E0E0; }
 </style>
 """
-st.markdown(body=custom_css, unsafe_allow_html=True)
+# FIXED: Safe positional markdown rendering to stop TypeErrors
+st.markdown(custom_css, unsafe_allow_html=True)
 
-if "logged_in_user" not in st.session_state: st.session_state["logged_in_user"] = None
-if "user_profile" not in st.session_state: st.session_state["user_profile"] = {}
+if "logged_in_user" not in st.session_state: 
+    st.session_state["logged_in_user"] = None
+if "user_profile" not in st.session_state: 
+    st.session_state["user_profile"] = {}
 
-st.markdown(body="<h1>🎓 Physical Sciences Academic Companion (PCA)</h1>", unsafe_allow_html=True)
-st.markdown(body="<p class='subtitle'>Official Portal | Faculty of Physical Sciences</p>", unsafe_allow_html=True)
+st.markdown("<h1>🎓 Physical Sciences Academic Companion (PCA)</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Official Portal | Faculty of Physical Sciences</p>", unsafe_allow_html=True)
 
 col_dept, col_auth = st.columns([4, 5])
 
@@ -136,7 +146,6 @@ with col_auth:
                     conn = sqlite3.connect(DB_FILE)
                     cursor = conn.cursor()
                     
-                    # Verify Matric Number uniqueness explicitly before trying insert
                     cursor.execute("SELECT username FROM users WHERE matric_no = ?", (reg_matric,))
                     if cursor.fetchone():
                         st.error("❌ This Matric Number is already tied to an existing account.")
@@ -162,9 +171,11 @@ with col_auth:
                             candidate_patterns = [f"{base_clean}{random.randint(10, 99)}", f"{base_clean}_{random.randint(100, 999)}", f"{base_clean}_fps"]
                             for candidate in candidate_patterns:
                                 cursor.execute("SELECT username FROM users WHERE username = ?", (candidate,))
-                                if not cursor.fetchone(): suggestions.append(candidate)
+                                if not cursor.fetchone(): 
+                                    suggestions.append(candidate)
                             st.markdown("**💡 Try an available username variant:**")
-                            for sugg in suggestions[:3]: st.code(sugg)
+                            for sugg in suggestions[:3]: 
+                                st.code(sugg)
                         finally:
                             conn.close()
                 else:
@@ -185,6 +196,8 @@ with col_auth:
                         st.rerun()
                     else:
                         st.error("Invalid credentials.")
+                else:
+                    st.warning("Fields cannot be empty.")
     else:
         st.success(f"👤 Account Verified: **{st.session_state['logged_in_user']}**")
         st.caption(f"🛡️ {st.session_state['user_profile']['matric']} | {st.session_state['user_profile']['level']}")
@@ -201,7 +214,7 @@ with col_dept:
     else:
         department = st.selectbox("Select Your Department", ["Computer Science", "Mathematics", "Physics", "Chemistry", "Statistics", "Industrial Chemistry"])
 
-st.markdown(body="---")
+st.markdown("---")
 
 grade_scale = {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0}
 
@@ -214,12 +227,12 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # TAB 1: CALCULATION CORE WITH COURSE-LEVEL HISTORY STREAMING
 with tab1:
-    st.write("Calculate your detailed Semester GPAs and Cumulative CGPA using scores or grades.")
+    st.write("Calculate your detailed Semester GPAs and Cumulative CGPA.")
     num_semesters = st.number_input("How many semesters are you calculating for?", min_value=1, max_value=12, value=2, step=1, key="t1_sems")
     
     grand_total_units = 0
     grand_total_points = 0
-    calculated_courses_cache = [] # Cache individual course rows dynamically
+    calculated_courses_cache = []
     
     for sem in range(int(num_semesters)):
         with st.expander(f"📅 Semester {sem + 1} Details", expanded=(sem == 0)):
@@ -231,7 +244,7 @@ with tab1:
             for i in range(int(num_courses)):
                 col1, col2, col3, col4 = st.columns([3, 1.5, 2, 2.5])
                 with col1:
-                    c_code = st.text_input("Course Code", value=f"CHM{101+i if department=='Chemistry' else 101+i}", key=f"t1_code_{sem}_{i}").upper().strip()
+                    c_code = st.text_input("Course Code", value=f"CHM{101+i}", key=f"t1_code_{sem}_{i}").upper().strip()
                 with col2:
                     c_unit = st.number_input("Units", min_value=1, max_value=6, value=3, key=f"t1_u_{sem}_{i}")
                 with col3:
@@ -265,9 +278,7 @@ with tab1:
 
     if grand_total_units > 0:
         calc_cgpa = grand_total_points / grand_total_units
-        st.markdown("""<div class="result-card"><p style='letter-spacing: 1px;'>CUMULATIVE CGPA</p>"""
-                    f"""<div class="metric-val">{calc_cgpa:.2f}</div>"""
-                    f"""<p style='font-size: 13px; opacity: 0.8;'>Total Units: {int(grand_total_units)}</p></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="result-card"><p style='letter-spacing: 1px;'>CUMULATIVE CGPA</p><div class="metric-val">{calc_cgpa:.2f}</div><p style='font-size: 13px; opacity: 0.8;'>Total Units: {int(grand_total_units)}</p></div>""", unsafe_allow_html=True)
         
         if st.session_state["logged_in_user"] is not None:
             if st.button("💾 Commit Comprehensive Audit Data to Cloud Log"):
@@ -275,17 +286,14 @@ with tab1:
                 cursor = conn.cursor()
                 now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # Check for rapid spam saves (2-minute window block)
                 cursor.execute("SELECT timestamp FROM history WHERE username = ? ORDER BY id DESC LIMIT 1", (st.session_state["logged_in_user"],))
                 last_record = cursor.fetchone()
                 if last_record and datetime.now() - datetime.strptime(last_record[0], "%Y-%m-%d %H:%M:%S") < timedelta(minutes=2):
                     st.warning("⚠️ High frequency save intercepted. Wait a moment before logging modifications.")
                 else:
-                    # Save summary level
                     cursor.execute("INSERT INTO history (username, timestamp, department, cgpa, units) VALUES (?, ?, ?, ?, ?)",
                                    (st.session_state["logged_in_user"], now_str, department, round(calc_cgpa, 2), int(grand_total_units)))
                     
-                    # Save deep course-level data rows securely linked
                     for course in calculated_courses_cache:
                         cursor.execute("""
                             INSERT INTO course_history (username, timestamp, semester_index, course_code, units, grade, points)
@@ -296,20 +304,17 @@ with tab1:
                     st.success("🚀 Comprehensive courses and summary records logged permanently.")
                 conn.close()
 
-# TAB 2: TARGET & PRO-LEVEL PROGRESS GAUGES
+# TAB 2: TARGET TRACKERS
 with tab2:
     st.markdown("<h2>🎯 Target Engine</h2>", unsafe_allow_html=True)
     curr_cgpa = st.number_input("Your Current CGPA Baseline", min_value=0.0, max_value=5.0, value=3.42)
     curr_units = st.number_input("Your Earned Credit Units to Date", min_value=1, value=68)
     
     st.markdown("### **Class Standing Target Tracks**")
-    
-    # First Class Track Gauge
     fc_progress = min(max(curr_cgpa / 4.50, 0.0), 1.0)
     st.write(f"**First Class Boundary Track (4.50+)** | Progress: {fc_progress*100:.1f}%")
     st.progress(fc_progress)
     
-    # Second Class Upper Gauge
     21_progress = min(max(curr_cgpa / 3.50, 0.0), 1.0)
     st.write(f"**Second Class Upper Track (3.50+)** | Progress: {21_progress*100:.1f}%")
     st.progress(21_progress)
@@ -323,13 +328,13 @@ with tab3:
     if user_status_gpa < 3.50 and user_status_gpa >= 3.40:
         diff = 3.50 - user_status_gpa
         st.warning(f"💡 **Target Delta Warning:** You are exactly **{diff:.2f} points** away from a **Second Class Upper (2:1)** standing.")
-        st.markdown(f"- Securing an **A** grade inside an upcoming 3-unit fundamental course injects exactly **15 Quality Points** into your tracking ledger, dropping your gap requirement significantly.")
+        st.markdown("- Securing an **A** grade inside an upcoming 3-unit fundamental course injects exactly **15 Quality Points** into your tracking ledger, dropping your gap requirement significantly.")
     elif user_status_gpa >= 4.50:
         st.success("🏆 **Elite Multiplier Standing:** Your position is secure. Prioritize heavy credit load courses (3-unit and 4-unit sequences) to defend this high margin vector.")
     else:
         st.info("📊 **Stability Path Optimization:** Focus heavily on clearing minor foundational deficiencies. Transforming low mark entries into predictable 'B' profiles offers high return vectors.")
 
-# TAB 4: ADVANCED GRAPHICAL DASHBOARD & COMPREHENSIVE COURSE HISTORY VAULT
+# TAB 4: ADVANCED GRAPHICAL DASHBOARD
 with tab4:
     st.markdown("<h2>📈 Performance Analytics Vault</h2>", unsafe_allow_html=True)
     if st.session_state["logged_in_user"] is None:
@@ -337,13 +342,7 @@ with tab4:
     else:
         profile = st.session_state["user_profile"]
         
-        # Premium Profile Panel Display
-        st.markdown(f"""<div class="profile-card">
-            <h3 style="margin:0 0 10px 0; color:#4B0082;">STUDENT CARD: {st.session_state['logged_in_user'].upper()}</h3>
-            <p style="margin:2px 0;"><b>Matriculation ID:</b> {profile['matric']}</p>
-            <p style="margin:2px 0;"><b>Department:</b> {profile['dept']}</p>
-            <p style="margin:2px 0;"><b>Level Tracking:</b> {profile['level']}</p>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="profile-card"><h3 style="margin:0 0 10px 0; color:#4B0082;">STUDENT CARD: {st.session_state['logged_in_user'].upper()}</h3><p style="margin:2px 0;"><b>Matriculation ID:</b> {profile['matric']}</p><p style="margin:2px 0;"><b>Department:</b> {profile['dept']}</p><p style="margin:2px 0;"><b>Level Tracking:</b> {profile['level']}</p></div>""", unsafe_allow_html=True)
         
         conn = sqlite3.connect(DB_FILE)
         df_summary = pd.read_sql_query("SELECT timestamp, department, cgpa, units FROM history WHERE username = ? ORDER BY id ASC", conn, params=(st.session_state["logged_in_user"],))
@@ -361,12 +360,8 @@ with tab4:
             st.subheader("📉 Historical CGPA Progression Chart")
             st.line_chart(df_summary["cgpa"])
             
-            # Show actual courses stored for historical records verification
             if not df_courses.empty:
                 st.subheader("📋 Detailed Course Audit Records")
                 st.dataframe(df_courses, use_container_width=True, hide_index=True)
 
-st.markdown(body="""<div class="platform-footer">
-    <p style='font-weight: bold; color: #4B0082; margin-bottom: 2px;'>Physical Sciences Academic Companion (PCA)</p>
-    <p style='font-size: 12px; color: #777; margin-top: 0;'>Secure Production Engine Build v4.0</p>
-</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="platform-footer"><p style='font-weight: bold; color: #4B0082; margin-bottom: 2px;'>Physical Sciences Academic Companion (PCA)</p><p style='font-size: 12px; color: #777; margin-top: 0;'>Secure Production Engine Build v4.0</p></div>""", unsafe_allow_html=True)
