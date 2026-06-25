@@ -1,9 +1,19 @@
 import streamlit as st
+import os
 
-st.set_page_config(page_title="PCA_CGPA CALCULATOR", page_icon="🎓", layout="centered")
+# Configures the tab title and sidebar preview metadata
+st.set_page_config(
+    page_title="PCA_CGPA CALCULATOR", 
+    page_icon="🎓", 
+    layout="centered"
+)
+
+# Display your campaign banner at the very top if it exists
+if os.path.exists("campaign_flyer.jpg"):
+    st.image("campaign_flyer.jpg", use_container_width=True)
 
 st.title("🎓 PCA_CGPA CALCULATOR")
-st.write("Calculate your Semester GPAs and Cumulative CGPA across multiple semesters instantly!")
+st.write("Calculate your Semester GPAs and Cumulative CGPA across multiple semesters instantly.")
 
 # Grade mapping for Nigerian universities (5.0 scale)
 grade_map = {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0}
@@ -79,5 +89,11 @@ if grand_total_units > 0:
         st.warning("📚 Third Class Standing. Keep putting in effort!")
     else:
         st.error("⚠️ Pass/Academic Warning level. Focus hard on the upcoming sessions!")
+    
+    # Campaign endorsement placement at the very end of calculation
+    st.markdown("---")
+    st.markdown("<h3 style='text-align: center; color: #8A2BE2;'>💜 PEDRO @ NAPSS LEVEL</h3>", unsafe_allowed_html=True)
+    st.markdown("<p style='text-align: center; font-style: italic;'><strong>Tell a friend to tell a friend! 🚀</strong></p>", unsafe_allowed_html=True)
+
 else:
     st.write("Fill in your course details above to see your final cumulative result.")
