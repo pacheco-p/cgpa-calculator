@@ -1,16 +1,15 @@
 import streamlit as st
-import os
 
-# Configure premium page layout
+# Configure page layout
 st.set_page_config(
     page_title="PCA_CGPA CALCULATOR", 
     page_icon="🎓", 
     layout="centered"
 )
 
-# Premium EKSU Physical Science Branding (Purple & Gold Theme)
-st.markdown("""
-    <style>
+# Premium Purple & Gold Theme Custom Styling - Fixed Markdown Syntax
+custom_css = """
+<style>
     .main { background-color: #fafafa; }
     h1 { color: #4B0082; text-align: center; font-weight: 800; margin-bottom: 5px; }
     .zone-badge {
@@ -42,14 +41,14 @@ st.markdown("""
         padding-top: 25px;
         border-top: 2px dashed #4B0082;
     }
-    </style>
-""", unsafe_allowed_html=True)
+</style>
+"""
+st.markdown(custom_css, unsafe_allowed_html=True)
 
-# Main Navigation Tabs for the Assistant
+# Main Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["📊 Multi-Semester Calculator", "🎯 Target & 'What-If' Predictor", "🧠 Smart Academic Adviser"])
 
-# Global constants
-grade_map = {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0}
+# Global datasets
 course_database = {
     "Custom Course": 3,
     "CHM 101 (Introductory Chemistry I)": 4,
@@ -77,9 +76,7 @@ def get_zone_badge(cgpa):
     elif cgpa >= 2.40: return '<div class="zone-badge lower-division">📈 2:2 Zone</div>'
     else: return '<div class="zone-badge danger-zone">⚠️ Danger Zone</div>'
 
-# ==========================================
-# TAB 1: MULTI-SEMESTER CALCULATOR (V1.0 + V2.0 Elements)
-# ==========================================
+# TAB 1: MULTI-SEMESTER CALCULATOR
 with tab1:
     st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>", unsafe_allowed_html=True)
     st.write("Calculate your detailed Semester GPAs and Cumulative CGPA using your raw exam/test scores.")
@@ -109,7 +106,7 @@ with tab1:
                 with col3:
                     score = st.number_input("Score (0-100)", min_value=0, max_value=100, value=70, key=f"s_val_{sem}_{i}")
                 
-                # Auto score-to-grade converter
+                # Auto score conversion logic
                 if score >= 70: letter, pt = "A", 5.0
                 elif score >= 60: letter, pt = "B", 4.0
                 elif score >= 50: letter, pt = "C", 3.0
@@ -145,9 +142,7 @@ with tab1:
             </div>
         """, unsafe_allowed_html=True)
 
-# ==========================================
-# TAB 2: TARGET & "WHAT-IF" PREDICTOR (V2.0 Upgrades)
-# ==========================================
+# TAB 2: TARGET & "WHAT-IF" PREDICTOR
 with tab2:
     st.markdown("<h2>🎯 Target & 'What-If' Predictor</h2>", unsafe_allowed_html=True)
     
@@ -162,7 +157,6 @@ with tab2:
         
     if st.button("Calculate Needed Performance"):
         current_total_gp = curr_cgpa * curr_units
-        # Assuming an average of 20 units per remaining semester
         estimated_future_units = remaining_semesters * 20 
         total_final_units = curr_units + estimated_future_units
         required_grand_gp = target_cgpa * total_final_units
@@ -171,22 +165,21 @@ with tab2:
         
         st.markdown("#### **Prediction Verdict:**")
         if required_average_gpa > 5.0:
-            st.error(f"Mathematically, reaching {target_cgpa:.2f} isn't possible in {remaining_semesters} semesters with an average 20-unit load. Focus on maximizing every single upcoming class to finish as strongly as possible!")
+            st.error(f"Mathematically, reaching {target_cgpa:.2f} isn't possible in {remaining_semesters} semesters with an average 20-unit load. Focus on maximizing every upcoming class!")
         elif required_average_gpa < 1.0:
-            st.success(f"You are completely on track! You need to maintain an average semester GPA of just **{max(required_average_gpa, 1.0):.2f}** to achieve your target.")
+            st.success(f"You are completely on track! Maintain an average semester GPA of just **{max(required_average_gpa, 1.0):.2f}** to cross your target.")
         else:
             st.warning(f"🎯 You need to hit an average GPA of **{required_average_gpa:.2f}** across each of your next **{remaining_semesters} semesters** to graduate with your target standing.")
 
     st.markdown("---")
     st.subheader("🎲 Addictive 'What-If' Simulator")
-    st.write("See instantly how your upcoming semester's expected marks will affect your real current CGPA.")
     
     col_w1, col_w2 = st.columns(2)
     with col_w1:
         sim_cgpa = st.number_input("Current CGPA Baseline", min_value=0.0, max_value=5.0, value=3.55, key="sim_cgpa")
         sim_units = st.number_input("Current Earned Units Baseline", min_value=1, max_value=200, value=75, key="sim_units")
     with col_w2:
-        st.markdown("**Simulate Grades to add this semester:**")
+        st.markdown("**Simulate Grades to add:**")
         num_as = st.number_input("Number of 'A' Grades (3 Units each)", min_value=0, max_value=10, value=3)
         num_bs = st.number_input("Number of 'B' Grades (3 Units each)", min_value=0, max_value=10, value=2)
         num_cs = st.number_input("Number of 'C' Grades (3 Units each)", min_value=0, max_value=10, value=0)
@@ -198,26 +191,23 @@ with tab2:
         new_sim_cgpa = ((sim_cgpa * sim_units) + sim_added_points) / (sim_units + sim_added_units)
         st.metric(label="Simulated New Cumulative CGPA", value=f"{new_sim_cgpa:.2f} / 5.00", delta=f"{new_sim_cgpa - sim_cgpa:+.3f}")
 
-# ==========================================
-# TAB 3: SMART ACADEMIC ADVISER (V3.0 Killer Feature)
-# ==========================================
+# TAB 3: SMART ACADEMIC ADVISER
 with tab3:
     st.markdown("<h2>🧠 Smart Academic Adviser</h2>", unsafe_allowed_html=True)
-    st.write("Artificial intelligence insights tailored around credit weights and risk management.")
     
-    user_status_gpa = st.number_input("Enter your true current CGPA to get customized advice:", min_value=0.0, max_value=5.0, value=3.55, key="adviser_input")
+    user_status_gpa = st.number_input("Enter your current CGPA to get advisor insights:", min_value=0.0, max_value=5.0, value=3.55, key="adviser_input")
     
-    st.markdown("#### **Personalized Advisor Directives:**")
+    st.markdown("#### **Advisor Directives:**")
     if user_status_gpa >= 4.50:
-        st.markdown("- **Maintain the Standard:** To safeguard your First Class standing, prioritize core 4-unit and 5-unit foundational modules (like `MTH` and `PHY`). A drop below 'B' in a high-unit core course drops your score significantly faster than a low grade in elective general studies.")
-        st.markdown("- **Unit Weight Strategy:** Focus energy heavily on 4-unit experimental laboratory or analytical chemical series courses this session.")
+        st.markdown("- **Protect Core Weights:** Prioritize high-unit core courses (like 4-unit or 5-unit modules). Dropping marks here impacts your baseline standing much quicker than electives.")
+        st.markdown("- **Session Strategy:** Allocate targeted study blocks to upcoming experimental or analytical series.")
     elif user_status_gpa >= 3.50:
-        st.markdown("- **Risk Warning:** To securely stay in the **2:1 Zone**, **avoid dropping below a 'C' grade in any 3-unit or 4-unit departmental course**. A single 'D' or 'E' in a 3-credit course requires multiple 'A' grades to repair.")
-        st.markdown("- **High Impact Target:** An 'A' in heavy departmental courses like **CHM 301** or **ICH 311** impacts your CGPA upward twice as much as an 'A' in a standard 1-unit or 2-unit general elective course due to heavy credit multipliers.")
+        st.markdown("- **Risk Warning:** To securely stay in the **2:1 Zone**, avoid dropping below a 'C' grade in any 3-unit or 4-unit departmental course. Low grades in heavy multipliers require multiple 'A's to balance out.")
+        st.markdown("- **High Impact Target:** Scoring an 'A' in crucial courses like **CHM 301** or **ICH 311** will lift your CGPA upward twice as fast as general elective courses.")
     else:
-        st.markdown("- **Recovery Road Map:** Prioritize eliminating 'F' and 'E' grades completely. Bringing a failing grade up to a solid 'C' or 'B' on a resit or subsequent semester provides the largest massive mathematical jump to your overall average standing.")
+        st.markdown("- **Recovery Road Map:** Prioritize clearing any past backlogs. Converting low scores into steady 'C' or 'B' grades provides the largest mathematical jump to your overall average standing.")
 
-# Persistent Campaign Endorsement Header/Footer across app paths
+# Campaign Footer
 st.markdown("""
     <div class="campaign-footer">
         <h2 style='color: #4B0082; margin-bottom: 2px;'>💜 PEDRO @ NAPSS LEVEL</h2>
