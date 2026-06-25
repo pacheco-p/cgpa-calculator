@@ -1,10 +1,3 @@
-Ah, look at file "1003097739.jpg"! We fixed it at the very top, but there's one more hidden unsafe_allowed_html=True a few lines down inside **Tab 1** where the title header is rendered (st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>"...)).
-Let's eradicate that typo everywhere once and for all. Here is the completely clean, fully audited code block.
-### 🛠️ What was fixed:
- * Fixed the unsafe_allow_html=True parameter name inside the main styling section.
- * Fixed the unsafe_allow_html=True parameter name inside **Tab 1** for the main page header.
-Copy this entire block, replace everything on GitHub, commit your changes, and reboot the app one last time!
-```python
 import streamlit as st
 
 # Configure page layout
@@ -222,5 +215,3 @@ st.markdown("""
         <p style='color: #D4AF37; font-size: 14px; font-weight: bold;'>✨ Tell a friend to tell a friend! ✨</p>
     </div>
 """, unsafe_allow_html=True)
-
-```
