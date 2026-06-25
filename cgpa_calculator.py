@@ -7,7 +7,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Premium Purple & Gold Theme Custom Styling - Fixed Parameter Syntax globally
+# Premium Purple & Gold Theme Custom Styling
 custom_css = """
 <style>
     .main { background-color: #fafafa; }
@@ -48,27 +48,8 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # Main Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["📊 Multi-Semester Calculator", "🎯 Target & 'What-If' Predictor", "🧠 Smart Academic Adviser"])
 
-# Global datasets
-course_database = {
-    "Custom Course": 3,
-    "CHM 101 (Introductory Chemistry I)": 4,
-    "CHM 102 (Introductory Chemistry II)": 4,
-    "MTH 101 (Elementary Mathematics I)": 5,
-    "MTH 102 (Elementary Mathematics II)": 5,
-    "PHY 101 (General Physics I)": 4,
-    "PHY 102 (General Physics II)": 4,
-    "CHM 211 (Organic Chemistry I)": 3,
-    "CHM 212 (Inorganic Chemistry I)": 3,
-    "CHM 213 (Physical Chemistry I)": 3,
-    "MTH 201 (Mathematical Methods I)": 3,
-    "PHY 201 (Mathematical Physics I)": 3,
-    "ICH 301 (Industrial Chemical Technology I)": 3,
-    "ICH 311 (Industrial Chemical Processes)": 3,
-    "CHM 301 (Organic Chemistry II)": 3,
-    "CHM 303 (Inorganic Chemistry II)": 3,
-    "CHM 311 (Physical Chemistry II)": 3,
-    "CHM 313 (Analytical Chemistry)": 3
-}
+# Grade to Points Map
+grade_scale = {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0}
 
 def get_zone_badge(cgpa):
     if cgpa >= 4.50: return '<div class="zone-badge first-class">🏆 First Class Zone</div>'
@@ -76,10 +57,10 @@ def get_zone_badge(cgpa):
     elif cgpa >= 2.40: return '<div class="zone-badge lower-division">📈 2:2 Zone</div>'
     else: return '<div class="zone-badge danger-zone">⚠️ Danger Zone</div>'
 
-# TAB 1: MULTI-SEMESTER CALCULATOR
+# TAB 1: MULTI-SEMESTER CALCULATOR (UNIVERSAL ACCESS)
 with tab1:
     st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>", unsafe_allow_html=True)
-    st.write("Calculate your detailed Semester GPAs and Cumulative CGPA using your raw exam/test scores.")
+    st.write("Calculate your detailed Semester GPAs and Cumulative CGPA across any department.")
     
     num_semesters = st.number_input("How many semesters are you calculating for?", min_value=1, max_value=12, value=2, step=1, key="main_sem_input")
     
@@ -94,30 +75,38 @@ with tab1:
             sem_points = 0
             
             for i in range(int(num_courses)):
-                col1, col2, col3 = st.columns([4, 2, 2])
+                st.markdown(f"**Course #{i+1}**")
+                col1, col2, col3, col4 = st.columns([3, 1.5, 2, 2.5])
                 
                 with col1:
-                    selected_course = st.selectbox("Select Course", list(course_database.keys()), key=f"c_sel_{sem}_{i}")
-                    default_unit = course_database[selected_course]
+                    # Open Text Input allows any student to type any code (MTH, PHY, CHM, CSC, etc.)
+                    course_code = st.text_input("Course Code", value=f"COURSE {i+1}", key=f"c_code_{sem}_{i}")
                 
                 with col2:
-                    course_unit = st.number_input("Units", min_value=1, max_value=6, value=default_unit, key=f"u_val_{sem}_{i}")
-                    
+                    course_unit = st.number_input("Units", min_value=1, max_value=6, value=3, key=f"u_val_{sem}_{i}")
+                
                 with col3:
-                    score = st.number_input("Score (0-100)", min_value=0, max_value=100, value=70, key=f"s_val_{sem}_{i}")
-                
-                # Auto score conversion logic
-                if score >= 70: letter, pt = "A", 5.0
-                elif score >= 60: letter, pt = "B", 4.0
-                elif score >= 50: letter, pt = "C", 3.0
-                elif score >= 45: letter, pt = "D", 2.0
-                elif score >= 40: letter, pt = "E", 1.0
-                else: letter, pt = "F", 0.0
-                
-                st.markdown(f"<p style='color: #6A0DAD; font-size: 12px; margin-top: -12px; margin-bottom: 12px;'>↳ Auto-Converted: <b>Grade {letter}</b> ({int(pt)} Points)</p>", unsafe_allow_html=True)
+                    input_mode = st.selectbox("Input By", ["Score (0-100)", "Direct Grade"], key=f"mode_{sem}_{i}")
+                    
+                with col4:
+                    if input_mode == "Score (0-100)":
+                        score = st.number_input("Score (0-100)", min_value=0, max_value=100, value=70, key=f"s_val_{sem}_{i}")
+                        # Score Conversion Logic
+                        if score >= 70: letter, pt = "A", 5.0
+                        elif score >= 60: letter, pt = "B", 4.0
+                        elif score >= 50: letter, pt = "C", 3.0
+                        elif score >= 45: letter, pt = "D", 2.0
+                        elif score >= 40: letter, pt = "E", 1.0
+                        else: letter, pt = "F", 0.0
+                        st.markdown(f"<p style='color: #6A0DAD; font-size: 11px; margin-top: -5px;'>↳ Calculated: <b>Grade {letter}</b> ({int(pt)} Pts)</p>", unsafe_allow_html=True)
+                    else:
+                        letter = st.selectbox("Choose Grade", ["A", "B", "C", "D", "E", "F"], key=f"g_val_{sem}_{i}")
+                        pt = grade_scale[letter]
+                        st.markdown(f"<p style='color: #6A0DAD; font-size: 11px; margin-top: -5px;'>↳ Manual: <b>{int(pt)} Points</b> Assigned</p>", unsafe_allow_html=True)
                 
                 sem_units += course_unit
                 sem_points += course_unit * pt
+                st.markdown("<hr style='margin: 8px 0; border-color: #eee;'>", unsafe_allow_html=True)
                 
             if sem_units > 0:
                 sem_gpa = sem_points / sem_units
@@ -199,11 +188,11 @@ with tab3:
     
     st.markdown("#### **Advisor Directives:**")
     if user_status_gpa >= 4.50:
-        st.markdown("- **Protect Core Weights:** Prioritize high-unit core courses (like 4-unit or 5-unit modules). Dropping marks here impacts your baseline standing much quicker than electives.")
-        st.markdown("- **Session Strategy:** Allocate targeted study blocks to upcoming experimental or analytical series.")
+        st.markdown("- **Protect Core Weights:** Prioritize high-unit core modules (like 4-unit or 5-unit foundational courses). Dropping marks here impacts your baseline standing much quicker than electives.")
+        st.markdown("- **Session Strategy:** Allocate targeted study blocks to upcoming experimental, computational, or advanced structural series.")
     elif user_status_gpa >= 3.50:
-        st.markdown("- **Risk Warning:** To securely stay in the **2:1 Zone**, avoid dropping below a 'C' grade in any 3-unit or 4-unit departmental course. Low grades in heavy multipliers require multiple 'A's to balance out.")
-        st.markdown("- **High Impact Target:** Scoring an 'A' in crucial courses like **CHM 301** or **ICH 311** will lift your CGPA upward twice as fast as general elective courses.")
+        st.markdown("- **Risk Warning:** To securely stay in the **2:1 Zone**, avoid dropping below a 'C' grade in any 3-unit or 4-unit core module. Low grades in heavy multipliers require multiple 'A's to balance out.")
+        st.markdown("- **High Impact Target:** Scoring an 'A' in crucial 3-unit or 4-unit departmental courses will lift your CGPA upward twice as fast as general options.")
     else:
         st.markdown("- **Recovery Road Map:** Prioritize clearing any past backlogs. Converting low scores into steady 'C' or 'B' grades provides the largest mathematical jump to your overall average standing.")
 
