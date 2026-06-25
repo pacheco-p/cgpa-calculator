@@ -7,7 +7,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Premium Purple & Gold Theme Custom Styling - Fixed Markdown Syntax
+# Premium Purple & Gold Theme Custom Styling - Fixed Parameter Syntax
 custom_css = """
 <style>
     .main { background-color: #fafafa; }
@@ -43,7 +43,7 @@ custom_css = """
     }
 </style>
 """
-st.markdown(custom_css, unsafe_allowed_html=True)
+st.markdown(custom_css, unsafe_allow_html=True)
 
 # Main Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["📊 Multi-Semester Calculator", "🎯 Target & 'What-If' Predictor", "🧠 Smart Academic Adviser"])
@@ -114,7 +114,7 @@ with tab1:
                 elif score >= 40: letter, pt = "E", 1.0
                 else: letter, pt = "F", 0.0
                 
-                st.markdown(f"<p style='color: #6A0DAD; font-size: 12px; margin-top: -12px; margin-bottom: 12px;'>↳ Auto-Converted: <b>Grade {letter}</b> ({int(pt)} Points)</p>", unsafe_allowed_html=True)
+                st.markdown(f"<p style='color: #6A0DAD; font-size: 12px; margin-top: -12px; margin-bottom: 12px;'>↳ Auto-Converted: <b>Grade {letter}</b> ({int(pt)} Points)</p>", unsafe_allow_html=True)
                 
                 sem_units += course_unit
                 sem_points += course_unit * pt
@@ -140,11 +140,11 @@ with tab1:
                 {get_zone_badge(calc_cgpa)}
                 <p style='font-size: 13px; opacity: 0.8; margin-top: 15px;'>Total Evaluated Credit Units: <b>{int(grand_total_units)}</b></p>
             </div>
-        """, unsafe_allowed_html=True)
+        """, unsafe_allow_html=True)
 
 # TAB 2: TARGET & "WHAT-IF" PREDICTOR
 with tab2:
-    st.markdown("<h2>🎯 Target & 'What-If' Predictor</h2>", unsafe_allowed_html=True)
+    st.markdown("<h2>🎯 Target & 'What-If' Predictor</h2>", unsafe_allow_html=True)
     
     st.subheader("📈 Future Target Calculator")
     col_t1, col_t2 = st.columns(2)
@@ -193,7 +193,7 @@ with tab2:
 
 # TAB 3: SMART ACADEMIC ADVISER
 with tab3:
-    st.markdown("<h2>🧠 Smart Academic Adviser</h2>", unsafe_allowed_html=True)
+    st.markdown("<h2>🧠 Smart Academic Adviser</h2>", unsafe_allow_html=True)
     
     user_status_gpa = st.number_input("Enter your current CGPA to get advisor insights:", min_value=0.0, max_value=5.0, value=3.55, key="adviser_input")
     
@@ -214,4 +214,4 @@ st.markdown("""
         <p style='font-style: italic; color: #555; font-size: 15px;'><b>Leadership • Transparency • Capacity</b></p>
         <p style='color: #D4AF37; font-size: 14px; font-weight: bold;'>✨ Tell a friend to tell a friend! ✨</p>
     </div>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True)
