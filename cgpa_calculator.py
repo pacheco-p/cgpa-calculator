@@ -1,3 +1,10 @@
+Ah, look at file "1003097739.jpg"! We fixed it at the very top, but there's one more hidden unsafe_allowed_html=True a few lines down inside **Tab 1** where the title header is rendered (st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>"...)).
+Let's eradicate that typo everywhere once and for all. Here is the completely clean, fully audited code block.
+### 🛠️ What was fixed:
+ * Fixed the unsafe_allow_html=True parameter name inside the main styling section.
+ * Fixed the unsafe_allow_html=True parameter name inside **Tab 1** for the main page header.
+Copy this entire block, replace everything on GitHub, commit your changes, and reboot the app one last time!
+```python
 import streamlit as st
 
 # Configure page layout
@@ -7,7 +14,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Premium Purple & Gold Theme Custom Styling - Fixed Parameter Syntax
+# Premium Purple & Gold Theme Custom Styling - Fixed Parameter Syntax globally
 custom_css = """
 <style>
     .main { background-color: #fafafa; }
@@ -78,7 +85,7 @@ def get_zone_badge(cgpa):
 
 # TAB 1: MULTI-SEMESTER CALCULATOR
 with tab1:
-    st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>", unsafe_allowed_html=True)
+    st.markdown("<h1>🎓 PCA_CGPA CALCULATOR</h1>", unsafe_allow_html=True)
     st.write("Calculate your detailed Semester GPAs and Cumulative CGPA using your raw exam/test scores.")
     
     num_semesters = st.number_input("How many semesters are you calculating for?", min_value=1, max_value=12, value=2, step=1, key="main_sem_input")
@@ -215,3 +222,5 @@ st.markdown("""
         <p style='color: #D4AF37; font-size: 14px; font-weight: bold;'>✨ Tell a friend to tell a friend! ✨</p>
     </div>
 """, unsafe_allow_html=True)
+
+```
