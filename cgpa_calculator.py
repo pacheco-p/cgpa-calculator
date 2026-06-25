@@ -1,43 +1,54 @@
 import streamlit as st
 
-st.set_page_config(page_title="CGPA Calculator", page_icon="🎓", layout="centered")
+st.set_page_config(page_title="PCA_CGPA CALCULATOR", page_icon="🎓", layout="centered")
 
-st.title("🎓 Smart CGPA Calculator")
+st.title("🎓 PCA_CGPA CALCULATOR")
 st.write("Calculate your Semester GPA or Cumulative CGPA instantly. Built for everyone!")
 
-# Step 1: Get number of courses
+# Grade mapping for Nigerian universities (5.0 scale)
+grade_map = {"A": 5.0, "B": 4.0, "C": 3.0, "D": 2.0, "E": 1.0, "F": 0.0}
+
 num_courses = st.number_input("How many courses did you take?", min_value=1, max_value=20, value=5, step=1)
 
-total_credit_hours = 0
-total_grade_points = 0
-
-st.write("---")
+st.markdown("---")
 st.subheader("📝 Enter Course Details")
 
-# Step 2: Dynamically create input rows for each course
+total_units = 0
+total_grade_points = 0
+
+# Create columns for clean entry
 for i in range(int(num_courses)):
-    col1, col2 = st.columns(2)
+    st.markdown(f"#### Course {i+1}")
+    col1, col2, col3 = st.columns([2, 2, 2])
     
     with col1:
-        credits = st.number_input(f"Course {i+1} Credits", min_value=1.0, max_value=6.0, value=3.0, step=1.0, key=f"cr_{i}")
+        course_code = st.text_input(f"Course Code", placeholder="e.g., MTH101", key=f"code_{i}")
+    
     with col2:
-        grade_point = st.number_input(f"Course {i+1} Grade Point (e.g. A=4.0)", min_value=0.0, max_value=5.0, value=4.0, step=0.1, key=f"gp_{i}")
+        course_unit = st.number_input(f"Course Unit", min_value=1, max_value=6, value=3, step=1, key=f"unit_{i}")
         
-    total_grade_points += (credits * grade_point)
-    total_credit_hours += credits
+    with col3:
+        grade = st.selectbox(f"Grade Obtained", list(grade_map.keys()), key=f"grade_{i}")
+        
+    # Calculations
+    total_units += course_unit
+    total_grade_points += course_unit * grade_map[grade]
+    st.markdown("---")
 
-st.write("---")
-
-# Step 3: Calculate and display results
-if total_credit_hours > 0:
-    cgpa = total_grade_points / total_credit_hours
+# Final Results
+if total_units > 0:
+    gpa = total_grade_points / total_units
+    st.subheader("📊 Your Calculation Result")
     
-    st.balloons() # Fun animation on success
-    st.success(f"### 🎉 Your Final CGPA: {cgpa:.2f}")
+    col_res1, col_res2 = st.columns(2)
+    col_res1.metric(label="Total Course Units", value=int(total_units))
+    col_res2.metric(label="Calculated GPA / CGPA", value=f"{gpa:.2f} / 5.00")
     
-    # Simple breakdown metric boxes
-    c1, c2 = st.columns(2)
-    c1.metric("Total Credits Earned", f"{total_credit_hours:.1f}")
-    c2.metric("Total Quality Points", f"{total_grade_points:.1f}")
-else:
-    st.error("Total credit hours cannot be zero.")
+    if gpa >= 4.50:
+        st.success("🔥 Excellent! First Class Standing.")
+    elif gpa >= 3.50:
+        st.info("👍 Great job! Second Class Upper Standing.")
+    elif gpa >= 2.40:
+        st.warning("👌 Good effort! Second Class Lower Standing.")
+    else:
+        st.error("📚 Keep pushing! You can lift this higher next semester.")
