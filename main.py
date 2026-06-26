@@ -76,20 +76,33 @@ tab1, tab2, tab3 = st.tabs(["📊 Multi-Semester Calculator", "🎯 Target Engin
 
 # TAB 1: CORE CALCULATOR
 with tab1:
-    num_sems = st.number_input("Calculated Semesters", min_value=1, max_value=12, value=1)
+    # Academic Label Map for easy human-readable headers
+    semester_labels = [
+        "100L - 1st Semester", "100L - 2nd Semester",
+        "200L - 1st Semester", "200L - 2nd Semester",
+        "300L - 1st Semester", "300L - 2nd Semester",
+        "400L - 1st Semester", "400L - 2nd Semester",
+        "500L - 1st Semester", "500L - 2nd Semester",
+        "600L - 1st Semester", "600L - 2nd Semester"
+    ]
+    
+    num_sems = st.number_input("Number of Semesters to Calculate", min_value=1, max_value=12, value=1)
     g_units, g_pts, courses_cache = 0, 0, []
     
-    # FIX 6: Contextual prefixes automatically updated depending on user choices
-    default_prefix = helpers.get_dept_prefix(active_dept)
-    
     for sem in range(int(num_sems)):
-        with st.expander(f"📅 Semester {sem + 1}", expanded=(sem == 0)):
-            num_courses = st.number_input(f"Courses in Sem {sem+1}", min_value=1, max_value=12, value=4, key=f"nc_{sem}")
+        sem_label = semester_labels[sem] if sem < len(semester_labels) else f"Semester {sem + 1}"
+        
+        with st.expander(f"📅 {sem_label}", expanded=(sem == 0)):
+            num_courses = st.number_input(f"Number of Courses", min_value=1, max_value=12, value=4, key=f"nc_{sem}")
             for i in range(int(num_courses)):
                 c1, c2, c3 = st.columns([4, 2, 3])
-                with c1: code = st.text_input("Course Code", value=f"{default_prefix}{101+i}", key=f"c_{sem}_{i}").upper().strip()
-                with c2: units = st.number_input("Units", min_value=1, max_value=6, value=3, key=f"u_{sem}_{i}")
-                with c3: grade = st.selectbox("Grade", ["A", "B", "C", "D", "E", "F"], key=f"g_{sem}_{i}")
+                with c1: 
+                    # Left completely blank for the user to type manually without forced defaults
+                    code = st.text_input("Course Code", placeholder="e.g., CHM101", key=f"c_{sem}_{i}").upper().strip()
+                with c2: 
+                    units = st.number_input("Units", min_value=1, max_value=6, value=3, key=f"u_{sem}_{i}")
+                with c3: 
+                    grade = st.selectbox("Grade", ["A", "B", "C", "D", "E", "F"], key=f"g_{sem}_{i}")
                 
                 pts = {"A":5,"B":4,"C":3,"D":2,"E":1,"F":0}[grade]
                 g_units += units
@@ -98,7 +111,6 @@ with tab1:
                 
     if g_units > 0:
         calc_cgpa = g_pts / g_units
-        # FIX 7: Classification tier display cards directly added
         st.markdown(f"""
             <div class="result-card">
                 <p style='letter-spacing: 1px; margin:0;'>AGGREGATE CUMULATIVE CGPA</p>
@@ -127,7 +139,7 @@ with tab3:
     else:
         st.info("Log in to pull historical analytics data logs.")
 
-# ADDED: Professional Team Attribution Footer
+# Professional Team Attribution Footer
 st.markdown("""
 <div class="platform-footer">
     <p style='font-weight: bold; color: #4B0082; margin-bottom: 2px;'>Physical Sciences Academic Companion (PCA)</p>
